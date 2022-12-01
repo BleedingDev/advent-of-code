@@ -2258,6 +2258,13 @@ const realInput = `10062
 2406
 5967`;
 
+type PositiveInteger<T extends number> = number extends T
+  ? never
+  : `${T}` extends `-${string}` | `${string}.${string}`
+  ? never
+  : T extends 0
+  ? never
+  : T;
 type Tuple<T, N extends number> = N extends N
   ? number extends N
     ? T[]
@@ -2274,20 +2281,10 @@ const max = (numbers: number[]): number => {
     return curr > acc ? curr : acc;
   });
 };
-const findMaxN = <K extends number>(arr: number[], n: K): Tuple<number, K> => {
-  return arr.reduce((acc, curr) => {
-    if (acc.length < n) {
-      return [...acc, curr];
-    }
-    acc = acc.sort();
-    if (curr > acc[0]) {
-      const [_, ...newArr] = acc;
-      return [...newArr, curr];
-    }
-    return acc;
-  }, [] as any);
-};
-const maxN = <K extends number>(arr: number[], n: K): Tuple<number, K> =>
+const maxN = <K extends number>(
+  arr: number[],
+  n: PositiveInteger<K>
+): Tuple<number, K> =>
   arr.reduce(
     (acc, curr) =>
       acc.length < n
@@ -2299,7 +2296,7 @@ const maxN = <K extends number>(arr: number[], n: K): Tuple<number, K> =>
   );
 
 const output = sum(
-  findMaxN(
+  maxN(
     realInput
       .split("\n\n")
       .map((oneElf) => oneElf.split("\n").map((str) => +str))
