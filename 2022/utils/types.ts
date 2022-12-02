@@ -1,10 +1,12 @@
-export type PositiveInteger<T extends number> = number extends T
+export type NonNegativeInteger<T extends number> = number extends T
   ? never
   : `${T}` extends `-${string}` | `${string}.${string}`
   ? never
-  : T extends 0
+  : T;
+export type PositiveInteger<T extends number> = NonNegativeInteger<T> extends 0
   ? never
   : T;
+
 export type Tuple<T, N extends number> = N extends N
   ? number extends N
     ? T[]
