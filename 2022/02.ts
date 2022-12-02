@@ -1,26 +1,26 @@
-import { rockPaperScisors } from "./data/02.ts";
+import { rockPaperScisors, SingleRow, OpTurn, MyTurn } from "./data/02.ts";
 import { sum } from "./utils/array.ts";
 
-type AllowedSigns = "Rock" | "Paper" | "Scissors";
+type Signs = "Rock" | "Paper" | "Scissors";
 type Result = "Win" | "Draw" | "Loss";
 
 const myTurnMap = {
   X: "Rock",
   Y: "Paper",
   Z: "Scissors",
-} satisfies Record<string, AllowedSigns>;
+} satisfies Record<string, Signs>;
 
 const opTurnMap = {
   A: "Rock",
   B: "Paper",
   C: "Scissors",
-} satisfies Record<string, AllowedSigns>;
+} satisfies Record<string, Signs>;
 
 const scoreSignMap = {
   Rock: 1,
   Paper: 2,
   Scissors: 3,
-} satisfies Record<AllowedSigns, number>;
+} satisfies Record<Signs, number>;
 
 const scoreWinMap: Record<Result, number> = {
   Win: 6,
@@ -28,7 +28,7 @@ const scoreWinMap: Record<Result, number> = {
   Loss: 0,
 };
 
-const winMap: Record<`${AllowedSigns}${AllowedSigns}`, Result> = {
+const winMap: Record<`${Signs}${Signs}`, Result> = {
   RockPaper: "Loss",
   RockRock: "Draw",
   RockScissors: "Win",
@@ -40,10 +40,7 @@ const winMap: Record<`${AllowedSigns}${AllowedSigns}`, Result> = {
   ScissorsPaper: "Win",
 } as const;
 
-const pickSignMap: Record<
-  `${AllowedSigns}${keyof typeof myTurnMap}`,
-  AllowedSigns
-> = {
+const pickSignMap: Record<`${Signs}${keyof typeof myTurnMap}`, Signs> = {
   PaperX: "Rock",
   PaperY: "Paper",
   PaperZ: "Scissors",
@@ -55,36 +52,24 @@ const pickSignMap: Record<
   ScissorsZ: "Rock",
 };
 
-const calcScore = ([pl1, pl2]: [AllowedSigns, AllowedSigns]): number =>
+const calcScore: (plSigns: [Signs, Signs]) => number = ([pl1, pl2]) =>
   scoreWinMap[winMap[`${pl2}${pl1}`]] + scoreSignMap[pl2];
-const toSigns = ([pl1, pl2]: [
-  keyof typeof opTurnMap,
-  keyof typeof myTurnMap
-]): [AllowedSigns, AllowedSigns] => [opTurnMap[pl1], myTurnMap[pl2]];
-const toSignsPickWinning = ([pl1, pl2]: [
-  keyof typeof opTurnMap,
-  keyof typeof myTurnMap
-]): [AllowedSigns, AllowedSigns] => [
+const toSigns: (plSigns: [OpTurn, MyTurn]) => [Signs, Signs] = ([pl1, pl2]) => [
   opTurnMap[pl1],
-  pickSignMap[`${opTurnMap[pl1]}${pl2}`],
+  myTurnMap[pl2],
 ];
+const toSignsPickWinning: (plSigns: [OpTurn, MyTurn]) => [Signs, Signs] = ([
+  pl1,
+  pl2,
+]) => [opTurnMap[pl1], pickSignMap[`${opTurnMap[pl1]}${pl2}`]];
 
-const output1 = sum(
-  rockPaperScisors
-    .split("\n")
-    .map((line) => line.split(" "))
-    .filter((row) => row.length === 2)
-    .map(toSigns)
-    .map(calcScore)
-);
+const preprocessedData = rockPaperScisors
+  .split("\n")
+  .map((line: SingleRow) => line.split(" ", 1))
+  .filter((row) => row.length === 2) as [OpTurn, MyTurn][];
 
-const output2 = sum(
-  rockPaperScisors
-    .split("\n")
-    .map((line) => line.split(" "))
-    .filter((row) => row.length === 2)
-    .map(toSignsPickWinning)
-    .map(calcScore)
-);
+const output1 = sum(preprocessedData.map(toSigns).map(calcScore));
+
+const output2 = sum(preprocessedData.map(toSignsPickWinning).map(calcScore));
 
 console.log(output1, output2);

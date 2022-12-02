@@ -1,4 +1,10 @@
-export const rockPaperScisors = `B X
+export type SingleRow = `${OpTurn} ${MyTurn}`;
+export type OpTurn = "A" | "B" | "C";
+export type MyTurn = "X" | "Y" | "Z";
+type Row<T extends string = string> = `${SingleRow}\n${T}`;
+type MultiRow = `${Row<Row>}`;
+
+export const rockPaperScisors: MultiRow = `B X
 A Z
 A Y
 B X
